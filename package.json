@@ -1,0 +1,11 @@
+{
+    "name": "BFJamz",
+    "version": "1.0.0",
+    "description": "Private DJ for Business Formal",
+    "main": "bot.js",
+    "author": "Michael Van Kirk",
+    "dependencies": {
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "winston": "^3.3.3"
+    }
+}
