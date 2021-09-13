@@ -1,37 +1,61 @@
-var Discord = require('discord.io');
 var logger = require('winston');
-var auth = require('./auth.json');
+const { prefix, token } = require("./config.json");
+const {Client, Collection, Intents} = require('discord.js');
+
+const queue = new Map();
+
+
+
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
     colorize: true
 });
 logger.level = 'debug';
+
 // Initialize Discord Bot
-var bot = new Discord.Client({
-    token: auth.token,
-    autorun: true
+var bot = new Client({
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES]
 });
-bot.on('ready', function (evt) {
-    logger.info('Connected');
-    logger.info('Logged in as: ');
-    logger.info(bot.username + ' - (' + bot.id + ')');
+bot.login(token);
+
+
+bot.on('ready', () => {
+    console.log(`Logged in!`);
 });
-bot.on('message', function (user, userID, channelID, message, evt) {
 
-    if (message.substring(0, 1) == '!') {
-        var args = message.substring(1).split(' ');
-        var cmd = args[0];
+bot.once("reconnecting", () => {
+    console.log("Reconnecting!");
+});
 
-        args = args.splice(1);
-        switch(cmd) {
-            // "!ping"
-            case 'ping':
-                bot.sendMessage({
-                    to: channelID,
-                    message: 'Pong!'
-                });
-            break;
-        }
+bot.once("disconnect", () => {
+    console.log("Disconnect!");
+});
+
+bot.on("message", async message => {
+    if (message.author.bot) return;
+    if (!message.content.startsWith(prefix)) return;
+    console.log('message received');
+
+    const serverQueue = queue.get(message.guild.id);
+
+    if (message.content.startsWith(`${prefix}play`)) {
+        play(message, serverQueue);
+        return;
+    } else if (message.content.startsWith(`${prefix}skip`)) {
+        skip(message, serverQueue);
+        return;
+    } else if (message.content.startsWith(`${prefix}stop`)) {
+        stop(message, serverQueue);
+        return;
+    } else {
+        message.channel.send("You need to enter a valid command!");
     }
 });
+
+play()
+
+skip()
+
+stop()
+
