@@ -5,8 +5,11 @@
     "main": "bot.js",
     "author": "Michael Van Kirk",
     "dependencies": {
-        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "@discordjs/opus": "^0.5.3",
+        "@discordjs/voice": "^0.6.0",
         "discord.js": "^13.1.0",
-        "winston": "^3.3.3"
+        "libsodium-wrappers": "^0.7.9",
+        "winston": "^3.3.3",
+        "ytdl-core": "^4.9.1"
     }
 }
