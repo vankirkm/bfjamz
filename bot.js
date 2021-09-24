@@ -15,6 +15,10 @@ const {
     NoSubscriberBehavior,
 } = require('@discordjs/voice');
 
+const { generateDependencyReport } = require('@discordjs/voice');
+
+console.log(generateDependencyReport());
+
 const queue = new Map();
 
 // Configure logger settings
@@ -32,7 +36,7 @@ bot.login(token);
 
 const player = createAudioPlayer({
 	behaviors: {
-		noSubscriber: NoSubscriberBehavior.Play,
+		noSubscriber: NoSubscriberBehavior.Pause,
 	},
 });
 
@@ -70,7 +74,7 @@ bot.on("messageCreate", async message => {
     }
 });
 
-async function initPlay(message, serverQueue){97
+async function initPlay(message, serverQueue){
     const messageArgs = message.content.split(" ");
 
     const voiceChannel = message.member.voice.channel;
@@ -105,8 +109,8 @@ async function initPlay(message, serverQueue){97
         channelQueue.songs.push(song);
 
         try {
-            const connection = await joinVoiceChannel({
-                channelId: message.id,
+            const connection = joinVoiceChannel({
+                channelId: voiceChannel.id,
                 guildId: message.guild.id,
                 adapterCreator: message.guild.voiceAdapterCreator
             });
@@ -142,8 +146,12 @@ function stop(){
 }
 
 function play(guild, song){
+    const currentSong = createAudioResource(song.url);
     const channelQueue = queue.get(guild.id);
     channelQueue.textChannel.send(`Start playing: **${song.title}**`);
+    player.play(currentSong);
+    channelQueue.connection.subscribe(player);
+
 }
 
 
