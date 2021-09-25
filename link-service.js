@@ -11,7 +11,7 @@ function getVideoSearchUrl(query) {
 }
 
 function getSearchData(params) {
-    response = await fetch('https://www.google.com/search?q='+'&source=lnms&tbm=vid');
+    response = await fetch('https://www.google.com/search?q=' + params + '&source=lnms&tbm=vid');
     const data = await response.json();
     return data
 }
