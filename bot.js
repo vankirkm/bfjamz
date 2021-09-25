@@ -15,10 +15,6 @@ const {
     NoSubscriberBehavior,
 } = require('@discordjs/voice');
 
-const { generateDependencyReport } = require('@discordjs/voice');
-
-console.log(generateDependencyReport());
-
 const queue = new Map();
 
 // Configure logger settings
@@ -66,8 +62,11 @@ bot.on("messageCreate", async message => {
     } else if (message.content.startsWith(`${prefix}skip`)) {
         skip(message, serverQueue);
         return;
-    } else if (message.content.startsWith(`${prefix}stop`)) {
-        stop(message, serverQueue);
+    } else if (message.content.startsWith(`${prefix}pause`)) {
+        pause(message, serverQueue);
+        return;
+    } else if (message.content.startsWith(`${prefix}resume`)) {
+        resume(message, serverQueue);
         return;
     } else {
         message.channel.send("You need to enter a valid command!");
@@ -91,8 +90,8 @@ async function initPlay(message, serverQueue){
 
     const songInfo = await ytdl.getInfo(messageArgs[1]);
     const song = {
-        title: "songInfo.videoDetails.title",
-        url: "C:\\Users\\micha\\Downloads\\yt5s.com-Bag Raiders - Shooting Stars (Official Video)-(128kbps).ogg"
+        title: songInfo.videoDetails.title,
+        url: songInfo.videoDetails.video_url
     }
 
     if(!serverQueue){
@@ -117,7 +116,6 @@ async function initPlay(message, serverQueue){
             channelQueue.connection = connection;
             play(message.guild, channelQueue.songs[0]);
         } catch (err) {
-            console.log(err);
             queue.delete(message.guild.id);
             return message.channel.send(err);
         }
@@ -129,7 +127,7 @@ async function initPlay(message, serverQueue){
     
 }
 
-function skip(){
+function skip(message, serverQueue){
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel)
         return message.channel.send(
@@ -137,21 +135,37 @@ function skip(){
     );
 }
 
-function stop(){
+function pause(message, serverQueue){
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel)
         return message.channel.send(
         "You need to be in a voice channel to stop music!"
     );
+    else{
+        message.channel.send(`**Pausing playback. Use !resume to continue playback.**`);
+        player.pause();
+    }
 }
 
-function play(guild, song){
-    const currentSong = createAudioResource(song.url);
+function resume(message, serverQueue) {
+    const voiceChannel = message.member.voice.channel;
+    if (!voiceChannel)
+        return message.channel.send(
+        "You need to be in a voice channel to resume music!"
+    );
+    else {
+        message.channel.send(`**Resuming playback.**`);
+        player.unpause();
+    }
+}
+
+async function play(guild, song){
+    const songToPlay = await ytdl(song.url);
+    const currentSong = createAudioResource(songToPlay);
     const channelQueue = queue.get(guild.id);
     channelQueue.textChannel.send(`Start playing: **${song.title}**`);
     player.play(currentSong);
     channelQueue.connection.subscribe(player);
-
 }
 
 
