@@ -36,6 +36,14 @@ const player = createAudioPlayer({
 	},
 });
 
+player.on('stateChange', (oldState, newState) => {
+    // Check to see if audio player has gone from playing to idle.
+    // If so, advance the queue and play next song
+    if(newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle){
+        advanceQueue();
+    }
+});
+
 
 bot.on('ready', () => {
     console.log(`Logged in!`);
@@ -166,6 +174,10 @@ async function play(guild, song){
     channelQueue.textChannel.send(`Start playing: **${song.title}**`);
     player.play(currentSong);
     channelQueue.connection.subscribe(player);
+}
+
+function advanceQueue(serverQueue){
+console.log("advancing queue");
 }
 
 
