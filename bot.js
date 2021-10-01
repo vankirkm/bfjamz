@@ -30,21 +30,6 @@ var bot = new Client({
 });
 bot.login(token);
 
-const player = createAudioPlayer({
-	behaviors: {
-		noSubscriber: NoSubscriberBehavior.Pause,
-	},
-});
-
-player.on('stateChange', (oldState, newState) => {
-    // Check to see if audio player has gone from playing to idle.
-    // If so, advance the queue and play next song
-    if(newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle){
-        advanceQueue();
-    }
-});
-
-
 bot.on('ready', () => {
     console.log(`Logged in!`);
 });
@@ -103,17 +88,29 @@ async function initPlay(message, serverQueue){
     }
 
     if(!serverQueue){
-        const channelQueue = {
+
+        const player = createAudioPlayer({
+            behaviors: {
+                noSubscriber: NoSubscriberBehavior.Pause,
+            },
+        });
+
+        player.on(AudioPlayerStatus.Idle, () => {
+            advanceQueue(message.guild.id);
+        });
+
+        const guildQueue = {
             textChannel: message.channel,
             voiceChannel: message.voiceChannel,
             connection: null,
             songs: [],
             volume: 5,
-            playing: true
+            playing: true,
+            player: player
         }
-        queue.set(message.guild.id, channelQueue);
+        queue.set(message.guild.id, guildQueue);
 
-        channelQueue.songs.push(song);
+        guildQueue.songs.push(song);
 
         try {
             const connection = joinVoiceChannel({
@@ -121,8 +118,8 @@ async function initPlay(message, serverQueue){
                 guildId: message.guild.id,
                 adapterCreator: message.guild.voiceAdapterCreator
             });
-            channelQueue.connection = connection;
-            play(message.guild, channelQueue.songs[0]);
+            guildQueue.connection = connection;
+            play(message.guild, guildQueue.songs[0]);
         } catch (err) {
             queue.delete(message.guild.id);
             return message.channel.send(err);
@@ -141,6 +138,9 @@ function skip(message, serverQueue){
         return message.channel.send(
         "You need to be in a voice channel to skip music!"
     );
+    else {
+        advanceQueue();
+    }
 }
 
 function pause(message, serverQueue){
@@ -170,14 +170,21 @@ function resume(message, serverQueue) {
 async function play(guild, song){
     const songToPlay = await ytdl(song.url);
     const currentSong = createAudioResource(songToPlay);
-    const channelQueue = queue.get(guild.id);
-    channelQueue.textChannel.send(`Start playing: **${song.title}**`);
-    player.play(currentSong);
-    channelQueue.connection.subscribe(player);
+    const guildQueue = queue.get(guild.id);
+    guildQueue.textChannel.send(`Start playing: **${song.title}**`);
+    guildQueue.player.play(currentSong);
+    guildQueue.connection.subscribe(guildQueue.player);
 }
 
-function advanceQueue(serverQueue){
-console.log("advancing queue");
+function advanceQueue(guildId){
+    const guildQueue = queue.get(guildId);
+    guildQueue.songs.splice(0,1);
+    if(guildQueue.songs[0]){
+        console.log("queue has another song");
+    }
+    else{
+        console.log("waiting for another song");
+    }
 }
 
 
