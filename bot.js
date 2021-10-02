@@ -99,6 +99,10 @@ async function initPlay(message, serverQueue){
             advanceQueue(message.guild);
         });
 
+        player.on('error', error => {
+            console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`);
+        });
+
         const guildQueue = {
             textChannel: message.channel,
             voiceChannel: message.voiceChannel,
