@@ -31,21 +31,21 @@ var bot = new Client({
 bot.login(token);
 
 bot.on('ready', () => {
-    console.log(`Logged in!`);
+    logger.log("info", `Logged in!`);
 });
 
 bot.once("reconnecting", () => {
-    console.log("Reconnecting!");
+    logger.log("info", "Reconnecting!");
 });
 
 bot.once("disconnect", () => {
-    console.log("Disconnect!");
+    logger.log("info", "Disconnecting!");
 });
 
 bot.on("messageCreate", async message => {
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
-    console.log('message received');
+    logger.log("info", 'message received');
 
     const serverQueue = queue.get(message.guild.id);
 
@@ -183,11 +183,11 @@ function advanceQueue(guild){
     const guildQueue = queue.get(guild.id);
     guildQueue.songs.splice(0,1);
     if(guildQueue.songs[0]){
-        console.log("queue has another song");
+        logger.log("info", "queue has another song");
         play(guild, guildQueue.songs[0]);
     }
     else{
-        console.log("waiting for another song");
+        logger.log("info", "waiting for another song");
     }
 }
 
