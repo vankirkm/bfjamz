@@ -96,7 +96,7 @@ async function initPlay(message, serverQueue){
         });
 
         player.on(AudioPlayerStatus.Idle, () => {
-            advanceQueue(message.guild.id);
+            advanceQueue(message.guild);
         });
 
         const guildQueue = {
@@ -126,6 +126,9 @@ async function initPlay(message, serverQueue){
         }
     }else {
         serverQueue.songs.push(song);
+        if(serverQueue.songs.length == 1){
+            return play(message.guild, serverQueue.songs[0]);
+        }
         return message.channel.send(`${song.title} has been added to the queue!`);
     }
 
@@ -176,11 +179,12 @@ async function play(guild, song){
     guildQueue.connection.subscribe(guildQueue.player);
 }
 
-function advanceQueue(guildId){
-    const guildQueue = queue.get(guildId);
+function advanceQueue(guild){
+    const guildQueue = queue.get(guild.id);
     guildQueue.songs.splice(0,1);
     if(guildQueue.songs[0]){
         console.log("queue has another song");
+        play(guild, guildQueue.songs[0]);
     }
     else{
         console.log("waiting for another song");
