@@ -65,6 +65,9 @@ bot.on("messageCreate", async message => {
     } else if (message.content.startsWith(`${prefix}play`)) {
         initPlay(message, serverQueue);
         return;
+    } else if (message.content.startsWith(`${prefix}clearqueue`)) {
+        clearSongQueue(message, serverQueue);
+        return;
     } 
     else {
         message.channel.send("You need to enter a valid command!");
@@ -225,6 +228,13 @@ function initNewGuildQueue(message) {
     });
     guildQueue.connection = connection;
     queue.set(message.guild.id, guildQueue);
+}
+
+function clearSongQueue(message, serverQueue) {
+    serverQueue.songs = [];
+    return message.channel.send(
+        "All songs have been cleared from the queue."
+    )
 }
 
 
