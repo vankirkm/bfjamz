@@ -181,6 +181,7 @@ async function addPlaylistToQueue(message, serverQueue) {
         initNewGuildQueue(message);
     }
     const guildQueue = queue.get(message.guild.id);
+    message.channel.send(`Adding playlist: **${playlist.title}** (${playlist.items.length} songs)`);
     addSongsToQueue(playlist, guildQueue);
     if(guildQueue.player._state != AudioPlayerStatus.Playing){
         play(message.guild, guildQueue.songs[0]);
