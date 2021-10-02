@@ -117,22 +117,22 @@ async function initPlay(message, serverQueue){
 
 function skip(message, serverQueue){
     const voiceChannel = message.member.voice.channel;
-    if (!voiceChannel)
+    if (!voiceChannel){
         return message.channel.send(
-        "You need to be in a voice channel to skip music!"
-    );
-    else {
+            "You need to be in a voice channel to skip music!"
+        )
+    }else {
         advanceQueue(message.guild);
     }
 }
 
 function pause(message, serverQueue){
     const voiceChannel = message.member.voice.channel;
-    if (!voiceChannel)
+    if (!voiceChannel){
         return message.channel.send(
-        "You need to be in a voice channel to stop music!"
-    );
-    else{
+            "You need to be in a voice channel to pause music!"
+        )
+    }else {
         message.channel.send(`**Pausing playback. Use !resume to continue playback.**`);
         serverQueue.player.pause();
     }
@@ -140,11 +140,11 @@ function pause(message, serverQueue){
 
 function resume(message, serverQueue) {
     const voiceChannel = message.member.voice.channel;
-    if (!voiceChannel)
+    if (!voiceChannel){
         return message.channel.send(
-        "You need to be in a voice channel to resume music!"
-    );
-    else {
+            "You need to be in a voice channel to resume music!"
+        )
+    }else {
         message.channel.send(`**Resuming playback.**`);
         serverQueue.player.unpause();
     }
@@ -206,7 +206,7 @@ function initNewGuildQueue(message) {
     });
 
     player.on('error', error => {
-        console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`);
+        console.error(`Error: ${error.message} with resource ${error.resource}`);
     });
 
     const guildQueue = {
