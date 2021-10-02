@@ -1,7 +1,7 @@
 var logger = require('winston');
 const { prefix, token } = require("./config.json");
 const {Client, Collection, Intents} = require('discord.js');
-const ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core-discord');
 const ytpl = require('ytpl');
 const {
 	AudioPlayerStatus,
@@ -154,11 +154,11 @@ function resume(message, serverQueue) {
 }
 
 async function play(guild, song){
-    const songToPlay = await ytdl(song.url, { filter: 'audioonly', dlChunkSize: 0 });
-    const currentSong = createAudioResource(songToPlay);
+    //const songToPlay = await ytdl(song.url, { type: 'opus' });
+    //const currentSong = createAudioResource(songToPlay);
     const guildQueue = queue.get(guild.id);
     guildQueue.textChannel.send(`Start playing: **${song.title}**`);
-    guildQueue.player.play(currentSong);
+    guildQueue.player.play(createAudioResource(await ytdl(song.url), { type: 'opus' }));
     guildQueue.connection.subscribe(guildQueue.player);
 }
 
