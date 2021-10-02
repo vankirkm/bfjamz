@@ -142,7 +142,8 @@ function skip(message, serverQueue){
         "You need to be in a voice channel to skip music!"
     );
     else {
-        advanceQueue();
+        serverQueue.player.pause();
+        advanceQueue(message.guild);
     }
 }
 
@@ -154,7 +155,7 @@ function pause(message, serverQueue){
     );
     else{
         message.channel.send(`**Pausing playback. Use !resume to continue playback.**`);
-        player.pause();
+        serverQueue.player.pause();
     }
 }
 
@@ -166,7 +167,7 @@ function resume(message, serverQueue) {
     );
     else {
         message.channel.send(`**Resuming playback.**`);
-        player.unpause();
+        serverQueue.player.unpause();
     }
 }
 
