@@ -29,7 +29,9 @@ logger.level = 'debug';
 var bot = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES]
 });
-bot.login(token);
+bot.login(token).catch(err => {
+    console.log(err);
+});
 
 bot.on('ready', () => {
     logger.log("info", `Logged in!`);
@@ -112,7 +114,7 @@ async function initPlay(message, serverQueue){
         if(serverQueue.songs.length == 1){
             return play(message.guild, serverQueue.songs[0]);
         }
-        return message.channel.send(`${song.title} has been added to the queue!`);
+        return message.channel.send(`**${song.title}** has been added to the queue!`);
     }
 
     
@@ -157,8 +159,8 @@ async function play(guild, song){
     //const songToPlay = await ytdl(song.url, { type: 'opus' });
     //const currentSong = createAudioResource(songToPlay);
     const guildQueue = queue.get(guild.id);
-    guildQueue.textChannel.send(`Start playing: **${song.title}**`);
-    guildQueue.player.play(createAudioResource(await ytdl(song.url), { type: 'opus' }));
+    guildQueue.textChannel.send(`Currently playing: **${song.title}**`);
+    guildQueue.player.play(createAudioResource(await ytdl(song.url, { type: 'opus' })));
     guildQueue.connection.subscribe(guildQueue.player);
 }
 
